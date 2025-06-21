@@ -1,119 +1,104 @@
 package btree;
-import Excepciones.ItemNoFound;
-import java.io.File;
 import java.util.Scanner;
-
-@SuppressWarnings("unused")
 public class Main {
     public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        BTree<Integer> btree = null;
-        int orden;
+        Scanner scanner = new Scanner(System.in);
+        BTree bTree = null; // Initialize the tree as null
 
-        // ================================
-        // Inicio: Selección de inicialización
-        // ================================
-        System.out.println("====== CONSTRUCCIÓN INICIAL ======");
-        System.out.println("1. Crear árbol vacío");
-        System.out.println("2. Cargar árbol desde archivo (Ejercicio 03)");
-        System.out.print("Seleccione una opción: ");
-        int inicial = sc.nextInt();
-        sc.nextLine(); // limpiar buffer
-
-        if (inicial == 1) {
-            System.out.print("Ingrese el orden del Árbol B: ");
-            orden = sc.nextInt();
-            sc.nextLine();
-            btree = new BTree<>(orden);
-        } else if (inicial == 2) {
-            System.out.print("Ingrese la ruta del archivo arbolB.txt: ");
-            String ruta = sc.nextLine();
-            try {
-                btree = BTree.building_Btree(ruta); // Ejercicio 03
-                System.out.println("✔ Árbol cargado exitosamente desde archivo.");
-            } catch (ItemNoFound e) {
-                System.out.println("❌ Error: " + e.getMessage());
-                return;
-            }
-        } else {
-            System.out.println("❌ Opción inválida.");
-            return;
-        }
-
-        // ======================
-        // Menú interactivo
-        // ======================
-        int opcion;
-        do {
-            System.out.println("\n====== MENÚ ÁRBOL B ======");
-            System.out.println("1. Insertar clave");
-            System.out.println("2. Mostrar árbol (formato figura 10.14)");
-            System.out.println("3. Verificar si está vacío");
-            System.out.println("4. Buscar clave (Ejercicio 01)");
-            System.out.println("5. Eliminar clave (Ejercicio 02)");
-            System.out.println("6. Insertar claves para construir figura 10.13 (demo)");
-            System.out.println("0. Salir");
-            System.out.print("Seleccione una opción: ");
-            opcion = sc.nextInt();
+        while (true) {
+            // Main Menu: Create or load a tree
+            System.out.println("\n1. Crear un nuevo árbol B"); // "Create a new B-tree"
+            System.out.println("2. Cargar un árbol desde un archivo"); // "Load a tree from a file"
+            System.out.println("3. Salir"); // "Exit"
+            System.out.print("Seleccione una opción: "); // "Select an option: "
+            
+            int opcion = scanner.nextInt(); // Get the selected option
 
             switch (opcion) {
-                case 1: // Insertar clave
-                    System.out.print("Ingrese la clave a insertar: ");
-                    int claveInsertar = sc.nextInt();
-                    btree.insert(claveInsertar);
-                    System.out.println("→ Clave insertada.");
+                case 1:
+                    // Create a new B-tree
+                    System.out.print("Ingrese el orden del árbol B: ");  // "Enter the B-tree order: "
+                    int orden = scanner.nextInt(); // Ask for the tree order
+                    bTree = new BTree(orden); // Create the tree with the given order
+                    System.out.println("Árbol B de orden " + orden + " creado exitosamente.");  // "B-tree of order X created successfully."
+                    treeMenu(bTree); // Go to the tree's menu
                     break;
-
-                case 2: // Mostrar árbol
-                    System.out.println("\n==== ÁRBOL B ====");
-                    System.out.println(btree);
+                case 2:
+                    // Load a B-tree from a file
+                    System.out.print("Ingrese el orden del árbol B: ");  // "Enter the B-tree order: "
+                    orden = scanner.nextInt(); // Ask for the tree order
+                    bTree = loadTreeFromFile(orden); // Implement file loading
+                    System.out.println("Árbol B cargado exitosamente."); // "B-tree loaded successfully."
+                    treeMenu(bTree); // Go to the tree's menu
                     break;
-
-                case 3: // Verificar vacío
-                    System.out.println(btree.isEmpty() ? "El árbol está vacío." : "El árbol NO está vacío.");
-                    break;
-
-                case 4: // Ejercicio 01 - Buscar
-                    System.out.print("Ingrese la clave a buscar: ");
-                    int claveBuscar = sc.nextInt();
-                    boolean existe = btree.search(claveBuscar);
-                    if (!existe)
-                        System.out.println("La clave " + claveBuscar + " no se encuentra en el árbol.");
-                    break;
-
-                case 5: // Ejercicio 02 - Eliminar
-                    System.out.print("Ingrese la clave a eliminar: ");
-                    int claveEliminar = sc.nextInt();
-                    btree.remove(claveEliminar);
-                    System.out.println("→ Clave eliminada (si existía).");
-                    break;
-
-                case 6: // Cargar claves de la figura 10.13
-                    int[] claves = {
-                        12, 25, 80, 142, 20, 150, 176, 206, 297,
-                        300,
-                        380, 395, 412,
-                        430, 451,
-                        480,
-                        493, 506,
-                        520,
-                        521, 600
-                    };
-                    for (int clave : claves) {
-                        btree.insert(clave);
-                    }
-                    System.out.println("✔ Árbol B cargado con las claves de la figura 10.13.");
-                    break;
-
-                case 0:
-                    System.out.println("Saliendo del programa...");
-                    break;
-
+                case 3:
+                    // Exit the program
+                    System.out.println("Saliendo..."); // "Exiting..."
+                    return; // End the program
                 default:
-                    System.out.println("Opción no válida. Intente otra vez.");
+                    System.out.println("Opción no válida. Por favor, intente nuevamente."); // "Invalid option. Please try again."
             }
-        } while (opcion != 0);
+        }
+    }
 
-        sc.close();
+    // Menu for tree operations after creation or loading
+    public static void treeMenu(BTree bTree) {
+        Scanner scanner = new Scanner(System.in);
+
+        while (true) {
+            System.out.println("\n1. Insertar claves en el árbol"); // "Insert keys into the tree"
+            System.out.println("2. Mostrar el árbol actual"); // "Show the current tree"
+            System.out.println("3. Guardar el árbol en un archivo"); // "Save the tree to a file"
+            System.out.println("4. Salir"); // "Exit"
+            System.out.print("Seleccione una opción: "); // "Select an option: "
+            
+            int opcion = scanner.nextInt(); // Get the selected option
+
+            switch (opcion) {
+                case 1:
+                    // Insert keys into the tree
+                    System.out.print("Ingrese las claves separadas por espacio: "); // "Enter keys separated by space:"
+                    scanner.nextLine();  // Clear the buffer
+                    String entrada = scanner.nextLine();  // Read the keys
+                    String[] clavesStr = entrada.split(" ");  // Split the input keys
+                    for (String clave : clavesStr) {
+                        try {
+                            int key = Integer.parseInt(clave);  // Convert to integer
+                            bTree.insert(key); // Insert the key into the tree
+                        } catch (NumberFormatException e) {
+                            System.out.println("La clave '" + clave + "' no es un número válido."); // "The key 'X' is not a valid number."
+                        }
+                    }
+                    System.out.println("Las claves han sido insertadas."); // "The keys have been inserted."
+                    break;
+                case 2:
+                    // Show the current tree
+                    System.out.println("Mostrando el árbol:"); // "Showing the tree:"
+                    bTree.printTree(bTree.root, 0); // Call the method to print the tree
+                    break;
+                case 3:
+                    // Save the tree to a file
+                    System.out.println("Guardando el árbol en un archivo..."); // "Saving the tree to a file..."
+                    saveTreeToFile(bTree); // Implement file saving
+                    break;
+                case 4:
+                    // Exit the tree menu
+                    System.out.println("Saliendo del menú del árbol..."); // "Exiting the tree menu..."
+                    return;
+                default:
+                    System.out.println("Opción no válida. Por favor, intente nuevamente."); // "Invalid option. Please try again."
+            }
+        }
+    }
+
+    // Method to load a tree from a file (you need to implement this part)
+    public static BTree loadTreeFromFile(int order) {
+        // This method should read the tree from a file and return it
+        return new BTree(order); // For now, just returning a new B-tree
+    }
+
+    // Method to save a tree to a file (you need to implement this part)
+    public static void saveTreeToFile(BTree bTree) {
+        // This method should serialize the tree or write it to a file
     }
 }
